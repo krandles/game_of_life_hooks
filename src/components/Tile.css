@@ -1,7 +1,13 @@
-p.alive {
-  background-color: green
+div.alive {
+  background-color: green;
+  height: 100%;
+  width: 100%;
+  border: 1px solid gray;
 }
 
-p.dead {
-  background-color: red
+div.dead {
+  background-color: red;
+  height: 100%;
+  width: 100%;
+  border: 1px solid gray;
 }

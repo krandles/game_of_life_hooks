@@ -1,6 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Tile from '../components/Tile'
 import './Board.css'
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
 
 function generateInitialBoard(width, height) {
   const result = []
@@ -42,13 +62,14 @@ function generateNewBoard(board) {
       }
     })
   })
-  console.log(newBoard)
   return newBoard
 }
 
 function Board() {
   const [width, setWidth] = useState(10);
   const [height, setHeight] = useState(10);
+  const [generations, setGenerations] = useState(1);
+  const [counterRunning, setCounterRunning] = useState(false)
   
   const boardArray = generateInitialBoard(width, height);
   const [boardState, setBoardState] = useState(boardArray)
@@ -60,28 +81,49 @@ function Board() {
     // console.log(countNeighbors(boardState, x, y))
   }
 
-  // const calculateTick = generateNewBoard(boardState)
+  const incrementTurn = () => {
+    setBoardState(generateNewBoard(boardState))
+    
+  }
+
+  const startCounter = () => {
+    let counterInterval = setInterval(setCounterRunning(true), 1000)
+  }
+
+  useInterval(() => {
+    setGenerations(generations + 1)
+  }, counterRunning ? 1000 : null)
 
   return (
     <>
-    <div id="board">
-      {boardArray.map((row, i) => (
-        row.map((column, j) => (
-          <Tile
-            coordinates={[j, i]}
-            alive={boardState[i][j]}
-            onClick={handleClick}
-            key={`x=${j}, y=${i}`}
-          />)
-        )
-      ))}
+    <div id="wrapper">
+      <div id="board">
+        {boardArray.map((row, i) => (
+          row.map((column, j) => (
+            <Tile
+              coordinates={[j, i]}
+              alive={boardState[i][j]}
+              onClick={handleClick}
+              key={`x=${j}, y=${i}`}
+            />)
+          )
+        ))}
+      </div>
     </div>
     <button onClick={(e) => {
       e.preventDefault()
-      setBoardState(generateNewBoard(boardState))
+      incrementTurn()
     }}>
-      Click Me
+      Next Generation
     </button>
+    <button onClick={(e) => {
+      e.preventDefault()
+      setCounterRunning(true)
+      setInterval(incrementTurn , 1000)
+    }}>
+      Auto
+    </button>
+    <p>Generation {generations}</p>
     </>
   );
 };

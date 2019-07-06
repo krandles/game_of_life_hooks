@@ -1,5 +1,17 @@
 #board {
+  width: 50vw;
+  height: 50vw;
+  margin: auto;
+  justify-content: center;
   display: grid;
-  grid-template-columns: repeat(10, auto);
-  grid-template-rows: repeat(10, auto);
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  justify-items: center;
+  align-items: center;
 };
+
+div#wrapper {
+  display: none;
+  align-items: center;
+  justify-content: center
+}
