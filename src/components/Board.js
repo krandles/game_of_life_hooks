@@ -34,7 +34,6 @@ function generateInitialBoard(width, height) {
 }
 
 function countNeighbors(board, x, y) {
-  // console.log("Hello from count")
   let sum = 0
   const neighborOffset = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
   neighborOffset.forEach(offset => {
@@ -57,8 +56,10 @@ function generateNewBoard(board) {
       let neighbors = countNeighbors(board, x, y)
       if ((neighbors < 2 || neighbors > 3) && board[y][x]) {
         newBoard[y][x] = false
-      } else if (neighbors === 3 && !board[y][x]) {
+      } else if (neighbors === 3 && board[y][x] === false) {
+        console.log(`3 hit at ${x}, ${y}`)
         newBoard[y][x] = true
+
       }
     })
   })
@@ -78,20 +79,25 @@ function Board() {
     const newBoard = [...boardState]
     newBoard[y][x] = !boardState[y][x]
     setBoardState(newBoard)
-    // console.log(countNeighbors(boardState, x, y))
   }
 
   const incrementTurn = () => {
     setBoardState(generateNewBoard(boardState))
-    
+    setGenerations(generations + 1)
   }
 
-  const startCounter = () => {
-    let counterInterval = setInterval(setCounterRunning(true), 1000)
+  const startCounter = (e) => {
+    e.preventDefault()
+    setCounterRunning(true)
+  }
+
+  const stopCounter = (e) => {
+    e.preventDefault()
+    setCounterRunning(false)
   }
 
   useInterval(() => {
-    setGenerations(generations + 1)
+    incrementTurn()
   }, counterRunning ? 1000 : null)
 
   return (
@@ -101,6 +107,7 @@ function Board() {
         {boardArray.map((row, i) => (
           row.map((column, j) => (
             <Tile
+              neighbors={countNeighbors(boardState, j, i)}
               coordinates={[j, i]}
               alive={boardState[i][j]}
               onClick={handleClick}
@@ -110,19 +117,17 @@ function Board() {
         ))}
       </div>
     </div>
+    <button onClick={() => setBoardState(generateInitialBoard(width, height))}>Reset</button>
     <button onClick={(e) => {
       e.preventDefault()
       incrementTurn()
     }}>
       Next Generation
     </button>
-    <button onClick={(e) => {
-      e.preventDefault()
-      setCounterRunning(true)
-      setInterval(incrementTurn , 1000)
-    }}>
-      Auto
-    </button>
+    {counterRunning ? 
+    <button onClick={(e) => stopCounter(e)}>Stop</button> :
+    <button onClick={(e) => startCounter(e)}>Start</button>
+    }
     <p>Generation {generations}</p>
     </>
   );
