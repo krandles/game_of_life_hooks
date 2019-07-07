@@ -8,7 +8,8 @@ function Tile(props) {
         className={props.alive ? 'alive' : 'dead'} 
         onClick={(e) => props.onClick(props.coordinates[0], props.coordinates[1], e)}  
       >
-      {props.neighbors}
+      {/* {`${props.neighbors}\n`} */}
+      {/* {`${props.coordinates[0]}, ${props.coordinates[1]})`} */}
       </div>
   );
 }

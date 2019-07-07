@@ -36,30 +36,42 @@ function generateInitialBoard(width, height) {
 function countNeighbors(board, x, y) {
   let sum = 0
   const neighborOffset = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+  
   neighborOffset.forEach(offset => {
     let offsetX = x + offset[0]
     let offsetY = y + offset[1]
-    // debugger
     if (offsetX >= 0 && offsetX <= board[0].length - 1 && offsetY >= 0 && offsetY <= board.length - 1) {
-      if (board[offsetY][offsetX] === true) {
-        sum++
-      }
+      sum = sum + board[offsetY][offsetX]
     }
   })
   return sum
 }
 
 function generateNewBoard(board) {
-  const newBoard = [...board]
+  const newBoard = []
+  board.forEach((el, i) => newBoard[i] = Array.from(el))
   board.forEach((column, y) => {
     column.forEach((tile, x) => {
       let neighbors = countNeighbors(board, x, y)
-      if ((neighbors < 2 || neighbors > 3) && board[y][x]) {
-        newBoard[y][x] = false
-      } else if (neighbors === 3 && board[y][x] === false) {
-        console.log(`3 hit at ${x}, ${y}`)
-        newBoard[y][x] = true
-
+      if (tile === true) {
+        switch (neighbors) {
+          case 2:
+          case 3:
+            newBoard[y][x] = true
+            break
+          default:
+            newBoard[y][x] = false
+            break;
+        }
+      } else if (tile === false) {
+        switch (neighbors) {
+          case 3:
+            newBoard[y][x] = true
+            break;
+          default:
+            newBoard[y][x] = false
+            break;
+        }
       }
     })
   })
@@ -67,22 +79,23 @@ function generateNewBoard(board) {
 }
 
 function Board() {
-  const [width, setWidth] = useState(10);
-  const [height, setHeight] = useState(10);
+  const [width, setWidth] = useState(50);
+  const [height, setHeight] = useState(50);
   const [generations, setGenerations] = useState(1);
   const [counterRunning, setCounterRunning] = useState(false)
   
   const boardArray = generateInitialBoard(width, height);
   const [boardState, setBoardState] = useState(boardArray)
 
-  const handleClick = (x, y) => {
+  const handleTileClick = (x, y) => {
     const newBoard = [...boardState]
     newBoard[y][x] = !boardState[y][x]
     setBoardState(newBoard)
   }
 
-  const incrementTurn = () => {
-    setBoardState(generateNewBoard(boardState))
+  const incrementTurn = (board) => {
+    console.log("from increment", board)
+    setBoardState(generateNewBoard(board))
     setGenerations(generations + 1)
   }
 
@@ -97,7 +110,7 @@ function Board() {
   }
 
   useInterval(() => {
-    incrementTurn()
+    incrementTurn(boardState)
   }, counterRunning ? 1000 : null)
 
   return (
@@ -110,17 +123,19 @@ function Board() {
               neighbors={countNeighbors(boardState, j, i)}
               coordinates={[j, i]}
               alive={boardState[i][j]}
-              onClick={handleClick}
+              onClick={handleTileClick}
               key={`x=${j}, y=${i}`}
             />)
           )
         ))}
       </div>
     </div>
-    <button onClick={() => setBoardState(generateInitialBoard(width, height))}>Reset</button>
+    <button onClick={() => setBoardState(generateInitialBoard(width, height))}>
+      Reset
+    </button>
     <button onClick={(e) => {
       e.preventDefault()
-      incrementTurn()
+      incrementTurn(boardState)
     }}>
       Next Generation
     </button>
