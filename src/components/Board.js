@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Slider, { Range } from 'rc-slider';
 import Tile from '../components/Tile'
 import './Board.css'
+import 'rc-slider/assets/index.css';
+
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -47,9 +50,9 @@ function countNeighbors(board, x, y) {
   return sum
 }
 
-function generateNewBoard(board) {
-  const newBoard = []
-  board.forEach((el, i) => newBoard[i] = Array.from(el))
+function generateNextBoard(board) {
+  const nextBoard = []
+  board.forEach((el, i) => nextBoard[i] = Array.from(el))
   board.forEach((column, y) => {
     column.forEach((tile, x) => {
       let neighbors = countNeighbors(board, x, y)
@@ -57,25 +60,25 @@ function generateNewBoard(board) {
         switch (neighbors) {
           case 2:
           case 3:
-            newBoard[y][x] = true
+            nextBoard[y][x] = true
             break
           default:
-            newBoard[y][x] = false
+            nextBoard[y][x] = false
             break;
         }
       } else if (tile === false) {
         switch (neighbors) {
           case 3:
-            newBoard[y][x] = true
+            nextBoard[y][x] = true
             break;
           default:
-            newBoard[y][x] = false
+            nextBoard[y][x] = false
             break;
         }
       }
     })
   })
-  return newBoard
+  return nextBoard
 }
 
 function Board() {
@@ -83,19 +86,25 @@ function Board() {
   const [height, setHeight] = useState(50);
   const [generations, setGenerations] = useState(1);
   const [counterRunning, setCounterRunning] = useState(false)
+  const [ticks, setTicks] = useState(null)
   
   const boardArray = generateInitialBoard(width, height);
   const [boardState, setBoardState] = useState(boardArray)
 
+  const marks = {
+    100: "100ms",
+    500: "500ms",
+    1000: "1s"
+  }
+
   const handleTileClick = (x, y) => {
-    const newBoard = [...boardState]
-    newBoard[y][x] = !boardState[y][x]
-    setBoardState(newBoard)
+    const nextBoard = [...boardState]
+    nextBoard[y][x] = !boardState[y][x]
+    setBoardState(nextBoard)
   }
 
   const incrementTurn = (board) => {
-    console.log("from increment", board)
-    setBoardState(generateNewBoard(board))
+    setBoardState(generateNextBoard(board))
     setGenerations(generations + 1)
   }
 
@@ -111,7 +120,11 @@ function Board() {
 
   useInterval(() => {
     incrementTurn(boardState)
-  }, counterRunning ? 1000 : null)
+  }, counterRunning ? ticks : null)
+
+  function handleSliderChange(value) {
+    setTicks(value)
+  } 
 
   return (
     <>
@@ -130,19 +143,30 @@ function Board() {
         ))}
       </div>
     </div>
-    <button onClick={() => setBoardState(generateInitialBoard(width, height))}>
-      Reset
-    </button>
-    <button onClick={(e) => {
-      e.preventDefault()
-      incrementTurn(boardState)
-    }}>
-      Next Generation
-    </button>
-    {counterRunning ? 
-    <button onClick={(e) => stopCounter(e)}>Stop</button> :
-    <button onClick={(e) => startCounter(e)}>Start</button>
-    }
+    <div className={"controls"}>
+      <button onClick={() => setBoardState(generateInitialBoard(width, height))}>
+        Reset
+      </button>
+      <button onClick={(e) => {
+        e.preventDefault()
+        incrementTurn(boardState)
+      }}>
+        Next Generation
+      </button>
+      {counterRunning ? 
+      <button onClick={(e) => stopCounter(e)}>Stop</button> :
+      <button onClick={(e) => startCounter(e)}>Start</button>
+      }
+      <div className={"slider-wrapper"}>
+        <Slider
+          marks={marks}
+          min={100}
+          max={1000}
+          onChange={handleSliderChange}
+          step={100}
+        />
+      </div>
+    </div>
     <p>Generation {generations}</p>
     </>
   );

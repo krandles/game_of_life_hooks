@@ -2,7 +2,7 @@ div.alive {
   background-color: green;
   height: 100%;
   width: 100%;
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
   border-radius: 50%;
 }
 
@@ -10,6 +10,6 @@ div.dead {
   background-color: lightgrey;
   height: 100%;
   width: 100%;
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
   border-radius: 50%;
 }

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './Tile.css';
 
 function Tile(props) {
-  // const [alive, setAlive] = useState(props.isAlive)
   return (
       <div
         className={props.alive ? 'alive' : 'dead'} 
